@@ -72,7 +72,7 @@ variable "installer_script_folder" {
 
 variable "volume_size" {
   type    = number
-  default = "/imagegeneration/installers"
+  default = 150
 }
 
 variable "volume_type" {

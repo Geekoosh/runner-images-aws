@@ -81,12 +81,14 @@ build {
   }
 
   provisioner "shell-local" {
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline = [
       "cp -r ${path.root}/../scripts/build ${var.installer_script_folder}"
     ]
   }
 
   provisioner "shell-local" {
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline = [
       "cp -r ${path.root}/../assets/post-gen ${var.image_folder}",
       "cp -r ${path.root}/../scripts/tests ${var.image_folder}",
@@ -95,12 +97,14 @@ build {
   }
 
   provisioner "shell-local" {
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline = [
       "cp -r ${path.root}/../../../helpers/software-report-base ${var.image_folder}/docs-gen/"
     ]
   }
 
   provisioner "shell-local" {
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline = [
       "cp ${path.root}/../toolsets/toolset-2204.json ${var.installer_script_folder}/toolset.json"
     ]
@@ -259,12 +263,14 @@ build {
   }
 
   provisioner "shell-local" {
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline = [
       "cp ${var.image_folder}/software-report.md ${path.root}/../Ubuntu2204-Readme.md"
     ]
   }
 
   provisioner "shell-local" {
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline = [
       "cp ${var.image_folder}/software-report.json ${path.root}/../software-report.json"
     ]
@@ -277,6 +283,7 @@ build {
   }
 
   provisioner "shell-local" {
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline = [
       "cp ${path.root}/../assets/ubuntu2204.conf /tmp/"
     ]

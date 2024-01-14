@@ -50,11 +50,6 @@ build {
 
   provisioner "shell-local" {
     execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
-    inline          = ["mkdir -p ${var.helper_script_folder}", "chmod 777 ${var.helper_script_folder}"]
-  }
-
-  provisioner "shell-local" {
-    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline          = ["mkdir ${var.image_folder}", "chmod 777 ${var.image_folder}"]
   }
 
@@ -79,6 +74,7 @@ build {
   }
 
   provisioner "shell-local" {
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline = [
       "cp -r ${path.root}/../scripts/helpers ${var.helper_script_folder}"
     ]

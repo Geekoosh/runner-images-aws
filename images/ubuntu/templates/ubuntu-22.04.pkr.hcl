@@ -237,17 +237,16 @@ build {
     scripts          = ["${path.root}/../scripts/build/configure-snap.sh"]
   }
 
-  provisioner "shell-local" {
-    execute_command   = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
-    expect_disconnect = true
-    inline            = ["echo 'Reboot VM'", "sudo reboot"]
-  }
+  #provisioner "shell-local" {
+  #  execute_command   = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
+  #  expect_disconnect = true
+  #  inline            = ["echo 'Reboot VM'", "sudo reboot"]
+  #}
 
   provisioner "shell-local" {
     execute_command     = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     pause_before        = "1m0s"
     scripts             = ["${path.root}/../scripts/build/cleanup.sh"]
-    start_retry_timeout = "10m"
   }
 
   provisioner "shell-local" {

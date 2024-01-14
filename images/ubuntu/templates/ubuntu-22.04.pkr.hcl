@@ -50,6 +50,11 @@ build {
 
   provisioner "shell-local" {
     execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
+    script          = "mkdir -p ${var.helper_script_folder}"
+  }
+
+  provisioner "shell-local" {
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline          = ["mkdir ${var.image_folder}", "chmod 777 ${var.image_folder}"]
   }
 

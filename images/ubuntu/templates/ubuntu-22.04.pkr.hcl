@@ -73,33 +73,36 @@ build {
     script          = "${path.root}/../scripts/build/configure-limits.sh"
   }
 
-  provisioner "file" {
-    destination = "${var.helper_script_folder}"
-    source      = "${path.root}/../scripts/helpers"
-  }
-
-  provisioner "file" {
-    destination = "${var.installer_script_folder}"
-    source      = "${path.root}/../scripts/build"
-  }
-
-  provisioner "file" {
-    destination = "${var.image_folder}"
-    sources     = [
-      "${path.root}/../assets/post-gen",
-      "${path.root}/../scripts/tests",
-      "${path.root}/../scripts/docs-gen"
+  provisioner "shell-local" {
+    inline = [
+      "cp -r ${path.root}/../scripts/helpers ${var.helper_script_folder}"
     ]
   }
 
-  provisioner "file" {
-    destination = "${var.image_folder}/docs-gen/"
-    source      = "${path.root}/../../../helpers/software-report-base"
+  provisioner "shell-local" {
+    inline = [
+      "cp -r ${path.root}/../scripts/build ${var.installer_script_folder}"
+    ]
   }
 
-  provisioner "file" {
-    destination = "${var.installer_script_folder}/toolset.json"
-    source      = "${path.root}/../toolsets/toolset-2204.json"
+  provisioner "shell-local" {
+    inline = [
+      "cp -r ${path.root}/../assets/post-gen ${var.image_folder}",
+      "cp -r ${path.root}/../scripts/tests ${var.image_folder}",
+      "cp -r ${path.root}/../scripts/docs-gen ${var.image_folder}"
+    ]
+  }
+
+  provisioner "shell-local" {
+    inline = [
+      "cp -r ${path.root}/../../../helpers/software-report-base ${var.image_folder}/docs-gen/"
+    ]
+  }
+
+  provisioner "shell-local" {
+    inline = [
+      "cp ${path.root}/../toolsets/toolset-2204.json ${var.installer_script_folder}/toolset.json"
+    ]
   }
 
   provisioner "shell-local" {
@@ -254,16 +257,16 @@ build {
     inline           = ["pwsh -File ${var.image_folder}/SoftwareReport/Generate-SoftwareReport.ps1 -OutputDirectory ${var.image_folder}", "pwsh -File ${var.image_folder}/tests/RunAll-Tests.ps1 -OutputDirectory ${var.image_folder}"]
   }
 
-  provisioner "file" {
-    destination = "${path.root}/../Ubuntu2204-Readme.md"
-    direction   = "download"
-    source      = "${var.image_folder}/software-report.md"
+  provisioner "shell-local" {
+    inline = [
+      "cp ${var.image_folder}/software-report.md ${path.root}/../Ubuntu2204-Readme.md"
+    ]
   }
 
-  provisioner "file" {
-    destination = "${path.root}/../software-report.json"
-    direction   = "download"
-    source      = "${var.image_folder}/software-report.json"
+  provisioner "shell-local" {
+    inline = [
+      "cp ${var.image_folder}/software-report.json ${path.root}/../software-report.json"
+    ]
   }
 
   provisioner "shell-local" {
@@ -272,9 +275,10 @@ build {
     scripts          = ["${path.root}/../scripts/build/configure-system.sh"]
   }
 
-  provisioner "file" {
-    destination = "/tmp/"
-    source      = "${path.root}/../assets/ubuntu2204.conf"
+  provisioner "shell-local" {
+    inline = [
+      "cp ${path.root}/../assets/ubuntu2204.conf /tmp/"
+    ]
   }
 
   provisioner "shell-local" {

@@ -36,12 +36,17 @@ variable "installer_script_folder" {
   default = "/imagegeneration/installers"
 }
 
-source "null" "build_image" {
-  communicator = "none"
+#source "null" "build_image" {
+#  communicator = "none"
+#}
+
+source "shell-local" "local" {
+  // You can define inline scripts or script files to be executed
+  inline = ["echo 'Running on local machine'"]
 }
 
 build {
-  sources = ["source.null.build_image"]
+  sources = ["source.shell-local.local"]
 
   provisioner "shell-local" {
     execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]

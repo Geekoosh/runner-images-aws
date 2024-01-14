@@ -1,33 +1,8 @@
 packer {
-  required_plugins {
-    amazon = {
-      version = ">= 1.2.9"
-      source  = "github.com/hashicorp/amazon"
-    }
-  }
 }
 
 locals {
   ami_name = var.ami_name != "" ? var.ami_name : "packer-${var.image_os}-${var.image_version}"
-}
-
-variable "ami_name" {
-  type    = string
-  default = ""
-}
-
-variable "aws_region" {
-  type    = string
-  default = "us-east-1"
-}
-
-variable "spot_instance_types" {
-  type    = list(string)
-  default = ["m5.large", "m5.xlarge", "c5.large", "c5.xlarge"]
-}
-
-variable "subnet_id" {
-  type    = string
 }
 
 variable "dockerhub_login" {
@@ -55,11 +30,6 @@ variable "image_os" {
   default = "ubuntu22"
 }
 
-variable "image_version" {
-  type    = string
-  default = "dev"
-}
-
 variable "imagedata_file" {
   type    = string
   default = "/imagegeneration/imagedata.json"
@@ -70,54 +40,24 @@ variable "installer_script_folder" {
   default = "/imagegeneration/installers"
 }
 
-variable "volume_size" {
-  type    = number
-  default = 150
-}
-
-variable "volume_type" {
-  type    = string
-  default = "gp2"
-}
-
-source "amazon-ebs" "build_image" {
-  ami_name           = "${local.ami_name}"
-  region             = "${var.aws_region}"
-  subnet_id          = "${var.subnet_id}"
-  spot_instance_types = var.spot_instance_types
-  spot_price          = "auto"
-  launch_block_device_mappings {
-      device_name = "/dev/sda1"
-      volume_size = "${var.volume_size}"
-      volume_type = "${var.volume_type}"
-      delete_on_termination = true
-  }
-  source_ami_filter {
-    filters = {
-      name                = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
-      root-device-type    = "ebs"
-      virtualization-type = "hvm"
-    }
-    owners = ["099720109477"] # Ubuntu
-    most_recent = true
-  }
-  ssh_username = "ubuntu"
+source "null" "build_image" {
+  communicator = "none"
 }
 
 build {
-  sources = ["source.amazon-ebs.build_image"]
+  sources = ["source.null.build_image"]
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     inline          = ["mkdir ${var.image_folder}", "chmod 777 ${var.image_folder}"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     script          = "${path.root}/../scripts/build/configure-apt-mock.sh"
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = [
@@ -127,7 +67,7 @@ build {
     ]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     script          = "${path.root}/../scripts/build/configure-limits.sh"
   }
@@ -161,7 +101,7 @@ build {
     source      = "${path.root}/../toolsets/toolset-2204.json"
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     inline          = [
       "mv ${var.image_folder}/docs-gen ${var.image_folder}/SoftwareReport",
@@ -169,37 +109,37 @@ build {
     ]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["IMAGE_VERSION=${var.image_version}", "IMAGEDATA_FILE=${var.imagedata_file}"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/configure-image-data.sh"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["IMAGE_VERSION=${var.image_version}", "IMAGE_OS=${var.image_os}", "HELPER_SCRIPTS=${var.helper_script_folder}"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/configure-environment.sh"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive", "HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/install-apt-vital.sh"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/install-powershell.sh"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
     execute_command  = "sudo sh -c '{{ .Vars }} pwsh -f {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/Install-PowerShellModules.ps1", "${path.root}/../scripts/build/Install-PowerShellAzModules.ps1"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}", "DEBIAN_FRONTEND=noninteractive"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = [
@@ -266,50 +206,50 @@ build {
     ]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}", "DOCKERHUB_LOGIN=${var.dockerhub_login}", "DOCKERHUB_PASSWORD=${var.dockerhub_password}"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/install-docker-compose.sh", "${path.root}/../scripts/build/install-docker.sh"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
     execute_command  = "sudo sh -c '{{ .Vars }} pwsh -f {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/Install-Toolset.ps1", "${path.root}/../scripts/build/Configure-Toolset.ps1"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/install-pipx-packages.sh"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "DEBIAN_FRONTEND=noninteractive", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
     execute_command  = "/bin/sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/install-homebrew.sh"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/configure-snap.sh"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     execute_command   = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     expect_disconnect = true
     inline            = ["echo 'Reboot VM'", "sudo reboot"]
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     execute_command     = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     pause_before        = "1m0s"
     scripts             = ["${path.root}/../scripts/build/cleanup.sh"]
     start_retry_timeout = "10m"
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["IMAGE_VERSION=${var.image_version}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
     inline           = ["pwsh -File ${var.image_folder}/SoftwareReport/Generate-SoftwareReport.ps1 -OutputDirectory ${var.image_folder}", "pwsh -File ${var.image_folder}/tests/RunAll-Tests.ps1 -OutputDirectory ${var.image_folder}"]
   }
@@ -326,7 +266,7 @@ build {
     source      = "${var.image_folder}/software-report.json"
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPT_FOLDER=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}", "IMAGE_FOLDER=${var.image_folder}"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/configure-system.sh"]
@@ -337,14 +277,9 @@ build {
     source      = "${path.root}/../assets/ubuntu2204.conf"
   }
 
-  provisioner "shell" {
+  provisioner "shell-local" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     inline          = ["mkdir -p /etc/vsts", "cp /tmp/ubuntu2204.conf /etc/vsts/machine_instance.conf"]
-  }
-
-  provisioner "shell" {
-    execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
-    inline          = ["sleep 30", "export HISTSIZE=0 && sync"]
   }
 
 }

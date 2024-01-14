@@ -50,7 +50,7 @@ build {
 
   provisioner "shell-local" {
     execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
-    script          = "mkdir -p ${var.helper_script_folder}"
+    inline          = ["mkdir -p ${var.helper_script_folder}"]
   }
 
   provisioner "shell-local" {

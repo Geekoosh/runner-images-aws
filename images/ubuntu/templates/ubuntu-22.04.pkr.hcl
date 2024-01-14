@@ -44,18 +44,18 @@ build {
   sources = ["source.null.build_image"]
 
   provisioner "shell-local" {
-    execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline          = ["mkdir ${var.image_folder}", "chmod 777 ${var.image_folder}"]
   }
 
   provisioner "shell-local" {
-    execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     script          = "${path.root}/../scripts/build/configure-apt-mock.sh"
   }
 
   provisioner "shell-local" {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-    execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = [
       "${path.root}/../scripts/build/install-ms-repos.sh",
       "${path.root}/../scripts/build/configure-apt-sources.sh",

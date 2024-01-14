@@ -150,7 +150,8 @@ build {
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}", "DEBIAN_FRONTEND=noninteractive"]
-    execute_command  = ["sudo", "/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]
+    # execute_command  = ["sudo", "/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]
+    execute_command  = ["bash", "-c", "{{.Vars}} {{.Script}}"]
     scripts          = [
       "${path.root}/../scripts/build/install-actions-cache.sh",
       "${path.root}/../scripts/build/install-runner-package.sh",

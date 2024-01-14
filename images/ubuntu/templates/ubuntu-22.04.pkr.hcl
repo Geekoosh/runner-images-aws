@@ -44,18 +44,18 @@ build {
   sources = ["source.null.build_image"]
 
   provisioner "shell-local" {
-    command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     inline          = ["mkdir ${var.image_folder}", "chmod 777 ${var.image_folder}"]
   }
 
   provisioner "shell-local" {
-    command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     script          = "${path.root}/../scripts/build/configure-apt-mock.sh"
   }
 
   provisioner "shell-local" {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive"]
-    command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = [
       "${path.root}/../scripts/build/install-ms-repos.sh",
       "${path.root}/../scripts/build/configure-apt-sources.sh",
@@ -64,7 +64,7 @@ build {
   }
 
   provisioner "shell-local" {
-    command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     script          = "${path.root}/../scripts/build/configure-limits.sh"
   }
 
@@ -98,7 +98,7 @@ build {
   }
 
   provisioner "shell-local" {
-    command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline          = [
       "mv ${var.image_folder}/docs-gen ${var.image_folder}/SoftwareReport",
       "mv ${var.image_folder}/post-gen ${var.image_folder}/post-generation"
@@ -107,37 +107,37 @@ build {
 
   provisioner "shell-local" {
     environment_vars = ["IMAGE_VERSION=${var.image_version}", "IMAGEDATA_FILE=${var.imagedata_file}"]
-    command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/configure-image-data.sh"]
   }
 
   provisioner "shell-local" {
     environment_vars = ["IMAGE_VERSION=${var.image_version}", "IMAGE_OS=${var.image_os}", "HELPER_SCRIPTS=${var.helper_script_folder}"]
-    command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/configure-environment.sh"]
   }
 
   provisioner "shell-local" {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive", "HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
-    command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/install-apt-vital.sh"]
   }
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}"]
-    command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/install-powershell.sh"]
   }
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
-    command  = "sudo sh -c '{{ .Vars }} pwsh -f {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/Install-PowerShellModules.ps1", "${path.root}/../scripts/build/Install-PowerShellAzModules.ps1"]
   }
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}", "DEBIAN_FRONTEND=noninteractive"]
-    command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = [
       "${path.root}/../scripts/build/install-actions-cache.sh",
       "${path.root}/../scripts/build/install-runner-package.sh",
@@ -204,42 +204,42 @@ build {
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}", "DOCKERHUB_LOGIN=${var.dockerhub_login}", "DOCKERHUB_PASSWORD=${var.dockerhub_password}"]
-    command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/install-docker-compose.sh", "${path.root}/../scripts/build/install-docker.sh"]
   }
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
-    command  = "sudo sh -c '{{ .Vars }} pwsh -f {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "pwsh", "-f", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/Install-Toolset.ps1", "${path.root}/../scripts/build/Configure-Toolset.ps1"]
   }
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
-    command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/install-pipx-packages.sh"]
   }
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "DEBIAN_FRONTEND=noninteractive", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
-    command  = "/bin/sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/install-homebrew.sh"]
   }
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}"]
-    command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/configure-snap.sh"]
   }
 
   provisioner "shell-local" {
-    command   = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command   = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     expect_disconnect = true
     inline            = ["echo 'Reboot VM'", "sudo reboot"]
   }
 
   provisioner "shell-local" {
-    command     = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command     = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     pause_before        = "1m0s"
     scripts             = ["${path.root}/../scripts/build/cleanup.sh"]
     start_retry_timeout = "10m"
@@ -264,7 +264,7 @@ build {
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPT_FOLDER=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}", "IMAGE_FOLDER=${var.image_folder}"]
-    command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command  = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     scripts          = ["${path.root}/../scripts/build/configure-system.sh"]
   }
 
@@ -274,7 +274,7 @@ build {
   }
 
   provisioner "shell-local" {
-    command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = ["sudo", "sh", "-c", "{{.Vars}}", "{{.Path}}"]
     inline          = ["mkdir -p /etc/vsts", "cp /tmp/ubuntu2204.conf /etc/vsts/machine_instance.conf"]
   }
 

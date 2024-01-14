@@ -50,7 +50,7 @@ build {
 
   provisioner "shell-local" {
     execute_command = ["sudo", "/bin/sh", "-c", "chmod +x {{ .Script }} && sudo bash -c '{{ .Vars }} {{ .Script }}'"]
-    inline          = ["mkdir ${var.image_folder}", "chmod 777 ${var.image_folder}"]
+    inline          = ["mkdir -p ${var.image_folder}", "chmod 777 ${var.image_folder}"]
   }
 
   provisioner "shell-local" {

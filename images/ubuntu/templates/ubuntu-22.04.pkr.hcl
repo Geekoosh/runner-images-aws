@@ -144,7 +144,7 @@ build {
 
   provisioner "shell-local" {
     environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
-    execute_command  = ["sudo", "bash", "-c", '{{ .Vars }} pwsh -f {{ .Path }}']
+    execute_command  = ["sudo bash -c '{{ .Vars }} pwsh -f {{ .Path }}'"]
     scripts          = ["${path.root}/../scripts/build/Install-PowerShellModules.ps1", "${path.root}/../scripts/build/Install-PowerShellAzModules.ps1"]
   }
 

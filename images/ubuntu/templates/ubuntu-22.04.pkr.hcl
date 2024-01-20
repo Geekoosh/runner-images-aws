@@ -7,14 +7,12 @@ packer {
   }
 }
 
-### Start Custom Data
-### End Custom Data
+### Custom Data
 
 locals {
   ami_name = var.ami_name != "" ? var.ami_name : "packer-${var.image_os}-${var.image_version}"
 
-  ### Start Custom Locals
-  ### End Custom Locals
+  ### Custom Locals
 }
 
 variable "ami_name" {
@@ -86,8 +84,7 @@ variable "volume_type" {
   default = "gp2"
 }
 
-### Start Custom Variables
-### End Custom Variables
+### Custom Variables
 
 source "amazon-ebs" "build_image" {
   ami_name           = "${local.ami_name}"
@@ -351,12 +348,10 @@ build {
     inline          = ["mkdir -p /etc/vsts", "cp /tmp/ubuntu2204.conf /etc/vsts/machine_instance.conf"]
   }
 
+  ### Custom Scripts
+
   provisioner "shell" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     inline          = ["sleep 30", "export HISTSIZE=0 && sync"]
   }
-
-  ### Start Custom Scripts
-  ### End Custom Scripts
-
 }

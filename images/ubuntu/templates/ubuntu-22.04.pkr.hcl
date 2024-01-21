@@ -34,6 +34,11 @@ variable "subnet_id" {
   type    = string
 }
 
+variable "aws_tags" {
+  type    = map(string)
+  default = {}
+}
+
 variable "dockerhub_login" {
   type    = string
   default = "${env("DOCKERHUB_LOGIN")}"
@@ -108,6 +113,8 @@ source "amazon-ebs" "build_image" {
     most_recent = true
   }
   ssh_username = "ubuntu"
+
+  tags = var.aws_tags
 }
 
 build {

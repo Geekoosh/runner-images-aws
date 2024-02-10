@@ -217,7 +217,6 @@ build {
       "${path.root}/../scripts/build/install-gcc.sh",
       "${path.root}/../scripts/build/install-cocoapods.sh",
       "${path.root}/../scripts/build/install-android-sdk.sh",
-      "${path.root}/../scripts/build/install-apache.sh",
       "${path.root}/../scripts/build/install-vcpkg.sh",
       "${path.root}/../scripts/build/install-safari.sh",
       "${path.root}/../scripts/build/install-chrome.sh",
@@ -230,6 +229,15 @@ build {
   }
 
   provisioner "shell" {
+    environment_vars = ["IMAGE_FOLDER=${local.image_folder}"]
+    execute_command  = "chmod +x {{ .Path }}; source $HOME/.bash_profile; {{ .Vars }} pwsh -f {{ .Path }}"
+    scripts          = [
+      "${path.root}/../scripts/build/Install-Toolset.ps1",
+      "${path.root}/../scripts/build/Configure-Toolset.ps1"
+    ]
+  }
+
+  provisioner "shell" {
     execute_command = "source $HOME/.bash_profile; ruby {{ .Path }}"
     script          = "${path.root}/../scripts/build/configure-xcode-simulators.rb"
   }
@@ -238,7 +246,8 @@ build {
     environment_vars = ["IMAGE_FOLDER=${local.image_folder}"]
     execute_command  = "source $HOME/.bash_profile; {{ .Vars }} {{ .Path }}"
     inline           = [
-      "pwsh -File \"${local.image_folder}/software-report/Generate-SoftwareReport.ps1\" -OutputDirectory \"${local.image_folder}/output/software-report\" -ImageName ${var.build_id}"
+      "pwsh -File \"${local.image_folder}/software-report/Generate-SoftwareReport.ps1\" -OutputDirectory \"${local.image_folder}/output/software-report\" -ImageName ${var.build_id}",
+      "pwsh -File \"${local.image_folder}/tests/RunAll-Tests.ps1\""
     ]
   }
 

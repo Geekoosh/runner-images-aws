@@ -114,7 +114,7 @@ source "amazon-ebs" "build_image" {
   }
   ssh_username = "ubuntu"
 
-  tags = var.aws_tags
+  tags = local.aws_tags
 }
 
 build {

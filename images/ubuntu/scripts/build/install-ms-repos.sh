@@ -6,6 +6,9 @@
 
 os_label=$(lsb_release -rs)
 
+# Install Ubuntu .NET backports package repository
+add-apt-repository -y ppa:dotnet/backports
+
 # Install Microsoft repository
 wget https://packages.microsoft.com/config/ubuntu/$os_label/packages-microsoft-prod.deb
 dpkg -i packages-microsoft-prod.deb

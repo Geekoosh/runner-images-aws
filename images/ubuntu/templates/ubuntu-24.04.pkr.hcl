@@ -1,45 +1,42 @@
 packer {
   required_plugins {
-    azure = {
-      source  = "github.com/hashicorp/azure"
-      version = "1.4.5"
+    amazon = {
+      version = ">= 1.2.9"
+      source  = "github.com/hashicorp/amazon"
     }
   }
 }
 
+### Custom Data
+
 locals {
-  managed_image_name = var.managed_image_name != "" ? var.managed_image_name : "packer-${var.image_os}-${var.image_version}"
+  ami_name = var.ami_name != "" ? var.ami_name : "packer-${var.image_os}-${var.image_version}"
+
+  ### Custom Locals
 }
 
-variable "allowed_inbound_ip_addresses" {
+variable "ami_name" {
+  type    = string
+  default = ""
+}
+
+variable "aws_region" {
+  type    = string
+  default = "us-east-1"
+}
+
+variable "spot_instance_types" {
   type    = list(string)
-  default = []
+  default = ["m5.large", "m5.xlarge", "c5.large", "c5.xlarge"]
 }
 
-variable "azure_tags" {
+variable "subnet_id" {
+  type    = string
+}
+
+variable "aws_tags" {
   type    = map(string)
   default = {}
-}
-
-variable "build_resource_group_name" {
-  type    = string
-  default = "${env("BUILD_RESOURCE_GROUP_NAME")}"
-}
-
-variable "client_cert_path" {
-  type    = string
-  default = "${env("ARM_CLIENT_CERT_PATH")}"
-}
-
-variable "client_id" {
-  type    = string
-  default = "${env("ARM_CLIENT_ID")}"
-}
-
-variable "client_secret" {
-  type      = string
-  default   = "${env("ARM_CLIENT_SECRET")}"
-  sensitive = true
 }
 
 variable "dockerhub_login" {
@@ -82,101 +79,46 @@ variable "installer_script_folder" {
   default = "/imagegeneration/installers"
 }
 
-variable "install_password" {
-  type      = string
-  default   = ""
-  sensitive = true
+variable "volume_size" {
+  type    = number
+  default = 150
 }
 
-variable "location" {
+variable "volume_type" {
   type    = string
-  default = "${env("ARM_RESOURCE_LOCATION")}"
+  default = "gp2"
 }
 
-variable "managed_image_name" {
-  type    = string
-  default = ""
-}
+### Custom Variables
 
-variable "managed_image_resource_group_name" {
-  type    = string
-  default = "${env("ARM_RESOURCE_GROUP")}"
-}
-
-variable "private_virtual_network_with_public_ip" {
-  type    = bool
-  default = false
-}
-
-variable "subscription_id" {
-  type    = string
-  default = "${env("ARM_SUBSCRIPTION_ID")}"
-}
-
-variable "temp_resource_group_name" {
-  type    = string
-  default = "${env("TEMP_RESOURCE_GROUP_NAME")}"
-}
-
-variable "tenant_id" {
-  type    = string
-  default = "${env("ARM_TENANT_ID")}"
-}
-
-variable "virtual_network_name" {
-  type    = string
-  default = "${env("VNET_NAME")}"
-}
-
-variable "virtual_network_resource_group_name" {
-  type    = string
-  default = "${env("VNET_RESOURCE_GROUP")}"
-}
-
-variable "virtual_network_subnet_name" {
-  type    = string
-  default = "${env("VNET_SUBNET")}"
-}
-
-variable "vm_size" {
-  type    = string
-  default = "Standard_D4s_v4"
-}
-
-source "azure-arm" "build_image" {
-  allowed_inbound_ip_addresses           = "${var.allowed_inbound_ip_addresses}"
-  build_resource_group_name              = "${var.build_resource_group_name}"
-  client_cert_path                       = "${var.client_cert_path}"
-  client_id                              = "${var.client_id}"
-  client_secret                          = "${var.client_secret}"
-  image_offer                            = "ubuntu-24_04-lts"
-  image_publisher                        = "canonical"
-  image_sku                              = "server-gen1"
-  location                               = "${var.location}"
-  managed_image_name                     = "${local.managed_image_name}"
-  managed_image_resource_group_name      = "${var.managed_image_resource_group_name}"
-  os_disk_size_gb                        = "75"
-  os_type                                = "Linux"
-  private_virtual_network_with_public_ip = "${var.private_virtual_network_with_public_ip}"
-  subscription_id                        = "${var.subscription_id}"
-  temp_resource_group_name               = "${var.temp_resource_group_name}"
-  tenant_id                              = "${var.tenant_id}"
-  virtual_network_name                   = "${var.virtual_network_name}"
-  virtual_network_resource_group_name    = "${var.virtual_network_resource_group_name}"
-  virtual_network_subnet_name            = "${var.virtual_network_subnet_name}"
-  vm_size                                = "${var.vm_size}"
-
-  dynamic "azure_tag" {
-    for_each = var.azure_tags
-    content {
-      name = azure_tag.key
-      value = azure_tag.value
-    }
+source "amazon-ebs" "build_image" {
+  ami_name           = "${local.ami_name}"
+  region             = "${var.aws_region}"
+  subnet_id          = "${var.subnet_id}"
+  spot_instance_types = var.spot_instance_types
+  spot_price          = "auto"
+  launch_block_device_mappings {
+      device_name = "/dev/sda1"
+      volume_size = "${var.volume_size}"
+      volume_type = "${var.volume_type}"
+      delete_on_termination = true
   }
+  source_ami_filter {
+    filters = {
+      name                = "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"
+      root-device-type    = "ebs"
+      virtualization-type = "hvm"
+    }
+    owners = ["099720109477"] # Ubuntu
+    most_recent = true
+  }
+  ssh_username = "ubuntu"
+
+  tags = local.aws_tags
 }
 
 build {
-  sources = ["source.azure-arm.build_image"]
+  sources = ["source.amazon-ebs.build_image"]
 
   provisioner "shell" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
@@ -385,9 +327,11 @@ provisioner "shell" {
     scripts          = ["${path.root}/../scripts/build/configure-system.sh"]
   }
 
+  ### Custom Scripts
+
   provisioner "shell" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
-    inline          = ["sleep 30", "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"]
+    inline          = ["sleep 30", "export HISTSIZE=0 && sync"]
   }
 
 }

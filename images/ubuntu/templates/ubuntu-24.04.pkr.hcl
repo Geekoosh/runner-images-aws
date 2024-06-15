@@ -20,6 +20,10 @@ variable "ami_name" {
   default = ""
 }
 
+variable "architecture" {
+  type    = string
+}
+
 variable "aws_region" {
   type    = string
   default = "us-east-1"
@@ -105,7 +109,8 @@ source "amazon-ebs" "build_image" {
   }
   source_ami_filter {
     filters = {
-      name                = "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"
+      name                = "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-*-server-*"
+      architecture        = "${var.architecture}"
       root-device-type    = "ebs"
       virtualization-type = "hvm"
     }

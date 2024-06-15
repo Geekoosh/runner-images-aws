@@ -11,9 +11,9 @@ os_label=$(lsb_release -rs)
 #dpkg -i packages-microsoft-prod.deb
 
 # update
-apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-apt-get -yq update
-apt-get -yq dist-upgrade
+apt-get install apt-transport-https ca-certificates curl software-properties-common
+apt-get update
+apt-get dist-upgrade
 
 # Install Ubuntu .NET backports package repository
 add-apt-repository -y ppa:dotnet/backports

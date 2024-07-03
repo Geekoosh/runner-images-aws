@@ -16,7 +16,7 @@ fi
 git fetch upstream --tags
 
 # 3. Find the latest tag starting with 'ubuntu22'
-LATEST_TAG=$(git tag -l 'ubuntu22*' --sort=-v:refname | head -n 1)
+LATEST_TAG=$(git tag -l 'ubuntu*' --sort=-v:refname | head -n 1)
 if [ -z "$LATEST_TAG" ]; then
     echo "No tags found starting with 'ubuntu22'"
     exit 1

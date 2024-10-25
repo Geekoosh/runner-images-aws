@@ -24,6 +24,10 @@ variable "architecture" {
   type    = string
 }
 
+variable "source_ami" {
+  type    = string
+}
+
 variable "aws_region" {
   type    = string
   default = "us-east-1"
@@ -107,16 +111,7 @@ source "amazon-ebs" "build_image" {
       volume_type = "${var.volume_type}"
       delete_on_termination = true
   }
-  source_ami_filter {
-    filters = {
-      name                = "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-*-server-*"
-      architecture        = "${var.architecture}"
-      root-device-type    = "ebs"
-      virtualization-type = "hvm"
-    }
-    owners = ["099720109477"] # Ubuntu
-    most_recent = true
-  }
+  source_ami = var.source_ami
   ssh_username = "ubuntu"
 
   tags = local.aws_tags

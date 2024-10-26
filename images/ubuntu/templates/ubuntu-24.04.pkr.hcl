@@ -339,4 +339,7 @@ provisioner "shell" {
     inline          = ["sleep 30", "export HISTSIZE=0 && sync"]
   }
 
+  post-processor "manifest" {
+    output = "manifest.json"
+  }
 }

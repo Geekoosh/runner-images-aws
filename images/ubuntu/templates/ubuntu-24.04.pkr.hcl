@@ -97,6 +97,10 @@ variable "volume_type" {
   default = "gp2"
 }
 
+variable "instance_profile" {
+  type    = string
+}
+
 ### Custom Variables
 
 source "amazon-ebs" "build_image" {
@@ -112,6 +116,7 @@ source "amazon-ebs" "build_image" {
       delete_on_termination = true
   }
   source_ami = var.source_ami
+  iam_instance_profile = var.instance_profile
   ssh_username = "ubuntu"
 
   tags = local.aws_tags
